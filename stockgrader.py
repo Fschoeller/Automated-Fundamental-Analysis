@@ -33,7 +33,8 @@ grading_metrics = {'Valuation' : ['Fwd P/E', 'PEG', 'P/S', 'P/B', 'P/FCF'],
                   'Performance' : ['Perf Month', 'Perf Quart', 'Perf Half', 'Perf Year', 'Perf YTD', 'Volatility M']}
 
 
-URL = 'https://finviz.com/screener.ashx?v=152&c=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,17,18,19,20,21,22,23,26,27,28,29,31,32,33,34,35,36,37,38,39,40,41,43,44,45,46,47,51,52,53,54,57,58,59,65,68,69'
+#URL = 'https://finviz.com/screener.ashx?v=152&c=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,17,18,19,20,21,22,23,26,27,28,29,31,32,33,34,35,36,37,38,39,40,41,43,44,45,46,47,51,52,53,54,57,58,59,65,68,69'
+URL = 'https://finviz.com/screener.ashx?v=152&f=idx_sp500&c=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,17,18,19,20,21,22,23,26,27,28,29,31,32,33,34,35,36,37,38,39,40,41,43,44,45,46,47,51,52,53,54,57,58,59,65,68,69'
 
 
 def getProxies(inURL):
@@ -312,12 +313,36 @@ def export_to_csv(filename):
     
     print('\nSaved as', f"StockRatings-{today_date}.csv")
     
-      
+
+def get_rating_df():
+    get_company_data(URL, debug=False)
+
+    get_sector_data()
+
+    get_stock_rating_data()
+
+    global allStockData
+    
+    allStockData['Overall Rating'] = data_to_add['Overall Rating']
+    allStockData['Valuation Grade'] = data_to_add['Valuation Grade']
+    allStockData['Profitability Grade'] = data_to_add['Profitability Grade']
+    allStockData['Growth Grade'] = data_to_add['Growth Grade']
+    allStockData['Performance Grade'] = data_to_add['Performance Grade']    
+    allStockData['Percent Diff'] = (pd.to_numeric(allStockData['Target Price'], errors='coerce') - pd.to_numeric(allStockData['Price'], errors='coerce')) / pd.to_numeric(allStockData['Price'], errors='coerce') * 100
+
+    ordered_columns = 'Ticker, Company, Market Cap, Overall Rating, Sector, Industry, Country, Valuation Grade, Profitability Grade, Growth Grade, Performance Grade, Fwd P/E, PEG, P/S, P/B, P/C, P/FCF, Dividend, Payout Ratio, EPS this Y, EPS next Y, EPS past 5Y, EPS next 5Y, Sales past 5Y, EPS Q/Q, Sales Q/Q, Insider Own, Insider Trans, Inst Own, Inst Trans, Short Ratio, ROA, ROE, ROI, Curr R, Quick R, LTDebt/Eq, Debt/Eq, Gross M, Oper M, Profit M, Perf Month, Perf Quart, Perf Half, Perf Year, Perf YTD, Volatility M, SMA20, SMA50, SMA200, 52W High, 52W Low, RSI, Earnings, Price, Target Price, Percent Diff'
+
+    stock_csv_data = allStockData
+    stock_csv_data = allStockData[ordered_columns.replace(', ', ',').split(',')]
+
+    return stock_csv_data
        
-get_company_data(URL, debug=False)
+if __name__ == '__main__':
+    get_company_data(URL, debug=False)
 
-get_sector_data()
+    get_sector_data()
 
-get_stock_rating_data()
+    get_stock_rating_data()
 
-export_to_csv(f"StockRatings-{today_date}.csv")
+    export_to_csv(f"StockRatings-{today_date}.csv")
+
